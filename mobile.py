@@ -47,6 +47,8 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(params=model.parameters(), lr=config.learning_rate, momentum=config.momentum,
                             weight_decay=config.weight_decay)
 
+file = open('result', 'w')
+
 # train the network
 for epoch in range(config.epochs):
     # adjust learning_rate
@@ -69,8 +71,9 @@ for epoch in range(config.epochs):
 
         running_loss += loss.item()
 
-        if i % 50 == 49:
-            print('train {}/{}: {}: loss={:.3f}'.format(epoch, config.epochs, i // 50, running_loss / 100))
+        if i % config.frequency == config.frequency - 1:
+            print('train {}/{}: {}/{}: loss={:.3f}'.format(epoch, config.epochs, i, train_set.__len__(),
+                                                           running_loss / 100))
             running_loss = 0
 
     # eval
@@ -84,3 +87,6 @@ for epoch in range(config.epochs):
         total += target.size(0)
         correct += (predicted == target).sum().item()
     print('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+    file.writelines('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+
+file.close()
