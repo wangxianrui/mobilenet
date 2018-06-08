@@ -1,7 +1,8 @@
 
 # parameters
+import os
 
-root = './cifar'
+root = os.path.expanduser('~/DATA/cifar10/')
 
 model = 'mobilenet'
 '''
