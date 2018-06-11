@@ -3,21 +3,17 @@ import os
 
 root = os.path.expanduser('~/DATA/cifar10/')
 
-model = 'mobilenet'
+model = 'MobileNetV2'
 '''
-mobilenet
-alexnet
-vgg16
-resnet18
-squeezenet1_1
-inception_v3
+MobileNet
+MobileNetV2
 ...
 '''
 workers = 4
 
 epochs = 90
 
-batch_size = 32
+batch_size = 128
 
 learning_rate = 1e-4
 
@@ -28,3 +24,5 @@ weight_decay = 1e-4
 frequency = 20
 
 use_cuda = True
+
+num_classes = 10

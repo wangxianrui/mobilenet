@@ -1,2 +1,4 @@
 
-cifar/
+.idea/
+__pycache__
+*.pt
