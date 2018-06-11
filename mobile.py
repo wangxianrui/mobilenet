@@ -9,7 +9,7 @@ import network
 import config
 
 # device
-device = torch.device('cuda')
+device = torch.device('cuda' if config.use_cuda else 'cpu')
 
 # load data
 root = config.root
@@ -78,6 +78,18 @@ for epoch in range(config.epochs):
 
     # eval
     model.eval()
+
+    correct = 0
+    total = 0
+    for i, (input, target) in enumerate(train_loader):
+        input, target = input.to(device), target.to(device)
+        output = model(input)
+        _, predicted = torch.max(output, 1)
+        total += target.size(0)
+        correct += (predicted == target).sum().item()
+    print('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+    file.writelines('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+
     correct = 0
     total = 0
     for i, (input, target) in enumerate(eval_loader):
@@ -88,5 +100,8 @@ for epoch in range(config.epochs):
         correct += (predicted == target).sum().item()
     print('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
     file.writelines('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+
+    # save
+    torch.save(model.state_dict(), config.model + '.pt')
 
 file.close()

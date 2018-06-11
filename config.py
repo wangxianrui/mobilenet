@@ -1,4 +1,3 @@
-
 # parameters
 import os
 
@@ -14,7 +13,6 @@ squeezenet1_1
 inception_v3
 ...
 '''
-
 workers = 4
 
 epochs = 90
@@ -28,3 +26,5 @@ momentum = 0.9
 weight_decay = 1e-4
 
 frequency = 20
+
+use_cuda = True
