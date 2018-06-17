@@ -11,18 +11,20 @@ MobileNetV2
 '''
 workers = 4
 
-epochs = 90
+epochs = 100
 
-batch_size = 128
+batch_size = 64
 
-learning_rate = 1e-4
+learning_rate = 1e-3
 
 momentum = 0.9
 
-weight_decay = 1e-4
+weight_decay = 1e-5
 
 frequency = 20
 
 use_cuda = True
 
 num_classes = 10
+
+scheduler_step = [30, 80, 120, 140]

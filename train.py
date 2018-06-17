@@ -12,6 +12,8 @@ import config
 
 # device
 device = torch.device('cuda' if config.use_cuda else 'cpu')
+# log
+write = SummaryWriter(log_dir='log')
 
 # load data
 root = config.root
@@ -46,19 +48,19 @@ else:
     exit(0)
 # model = torch.nn.DataParallel(model)
 model = model.to(device)
+# model.load_state_dict(torch.load(config.model + '.pt'))
 
 # criterion and optimizer
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(params=model.parameters(), lr=config.learning_rate, momentum=config.momentum,
                             weight_decay=config.weight_decay)
+scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer=optimizer, milestones=config.scheduler_step, gamma=0.1)
 
-write = SummaryWriter(log_dir='log')
 # train the network
 for epoch in range(config.epochs):
     # adjust learning_rate
-    lr = config.learning_rate * (0.1 ** (epoch // 30))
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
+    scheduler.step()
+    print(optimizer.param_groups[0]['lr'])
 
     # train
     running_loss = 0
