@@ -4,6 +4,7 @@ import torch.optim
 import torch.utils.data
 import torchvision.models
 import torchvision.transforms as transforms
+from tensorboardX import SummaryWriter
 
 import MobileNet
 import MobileNetV2
@@ -43,7 +44,7 @@ elif config.model == 'MobileNetV2':
 else:
     print('selece currect model')
     exit(0)
-model = torch.nn.DataParallel(model)
+# model = torch.nn.DataParallel(model)
 model = model.to(device)
 
 # criterion and optimizer
@@ -51,8 +52,7 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(params=model.parameters(), lr=config.learning_rate, momentum=config.momentum,
                             weight_decay=config.weight_decay)
 
-file = open('result', 'w')
-
+write = SummaryWriter(log_dir='log')
 # train the network
 for epoch in range(config.epochs):
     # adjust learning_rate
@@ -62,38 +62,34 @@ for epoch in range(config.epochs):
 
     # train
     running_loss = 0
+    correct = 0
+    total = 0
     model.train()
     for i, (input, target) in enumerate(train_loader):
         input, target = input.to(device), target.to(device)
-
         output = model(input)
         loss = criterion(output, target)
-
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         running_loss += loss.item()
-
+        _, predicted = torch.max(output, 1)
+        total += target.size(0)
+        correct += torch.sum(predicted == target).item()
         if i % config.frequency == config.frequency - 1:
-            print('train {}/{}: {}/{}: loss={:.3f}'.format(epoch, config.epochs, i, train_set.__len__(),
-                                                           running_loss / 100))
+            print('train {}/{}: {}/{}: loss={:.3f}'.format(epoch, config.epochs, i, len(train_loader),
+                                                           running_loss / config.frequency))
+            print('train {}/{}: {}/{}: accuracy={:.3f}%'.format(epoch, config.epochs, i, len(train_loader),
+                                                                correct / total * 100))
+            write.add_scalar('Train/loss', running_loss / config.frequency, epoch * len(train_loader) + i)
+            write.add_scalar('Train/accu', correct / total, epoch * len(train_loader) + i)
             running_loss = 0
+            correct = 0
+            total = 0
 
     # eval
     model.eval()
-
-    correct = 0
-    total = 0
-    for i, (input, target) in enumerate(train_loader):
-        input, target = input.to(device), target.to(device)
-        output = model(input)
-        _, predicted = torch.max(output, 1)
-        total += target.size(0)
-        correct += (predicted == target).sum().item()
-    print('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
-    file.writelines('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
-
     correct = 0
     total = 0
     for i, (input, target) in enumerate(eval_loader):
@@ -103,9 +99,8 @@ for epoch in range(config.epochs):
         total += target.size(0)
         correct += (predicted == target).sum().item()
     print('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
-    file.writelines('the accuracy of {}/{} epoch is {:.3f}%'.format(epoch, config.epochs, correct / total * 100))
+    write.add_scalar('Eval/accu', correct / total, epoch)
 
     # save
     torch.save(model.state_dict(), config.model + '.pt')
-
-file.close()
+write.close()
