@@ -10,8 +10,8 @@ import MobileNet
 import MobileNetV2
 import config
 
-# device
-device = torch.device('cuda' if config.use_cuda else 'cpu')
+# use_cuda
+use_cuda = config.use_cuda and torch.cuda.is_available()
 # log
 write = SummaryWriter(log_dir='log')
 
@@ -46,8 +46,9 @@ elif config.model == 'MobileNetV2':
 else:
     print('selece currect model')
     exit(0)
-# model = torch.nn.DataParallel(model)
-model = model.to(device)
+
+if use_cuda:
+    model = torch.nn.DataParallel(model.cuda())
 # model.load_state_dict(torch.load(config.model + '.pt'))
 
 # criterion and optimizer
@@ -68,7 +69,8 @@ for epoch in range(config.epochs):
     total = 0
     model.train()
     for i, (input, target) in enumerate(train_loader):
-        input, target = input.to(device), target.to(device)
+        if use_cuda:
+            input, target = input.cuda(), target.cuda()
         output = model(input)
         loss = criterion(output, target)
         optimizer.zero_grad()
@@ -95,7 +97,8 @@ for epoch in range(config.epochs):
     correct = 0
     total = 0
     for i, (input, target) in enumerate(eval_loader):
-        input, target = input.to(device), target.to(device)
+        if use_cuda:
+            input, target = input.cuda(), target.cuda()
         output = model(input)
         _, predicted = torch.max(output, 1)
         total += target.size(0)

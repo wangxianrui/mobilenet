@@ -15,7 +15,7 @@ epochs = 100
 
 batch_size = 64
 
-learning_rate = 1e-3
+learning_rate = 1e-1
 
 momentum = 0.9
 
@@ -27,4 +27,4 @@ use_cuda = True
 
 num_classes = 10
 
-scheduler_step = [30, 80, 120, 140]
+scheduler_step = [10, 30, 80, 120, 140]
