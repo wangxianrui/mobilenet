@@ -11,8 +11,6 @@ MobileNetV2
 '''
 workers = 4
 
-epochs = 100
-
 batch_size = 64
 
 learning_rate = 1e-1
@@ -28,3 +26,5 @@ use_cuda = True
 num_classes = 10
 
 scheduler_step = [10, 30, 80, 120, 140]
+
+epochs = scheduler_step[-1]
